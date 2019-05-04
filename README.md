@@ -1,4 +1,4 @@
-# client
+# server
 
 > A express.js project
 
