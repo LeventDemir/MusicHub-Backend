@@ -30,8 +30,6 @@ const user = new mongoose.Schema({
   },
   photo: {
     type: String,
-    // data: Buffer,
-    // contentType: String,
     required: true,
     default: "http://pngimages.net/sites/default/files/user-png-image-65995.png"
   },

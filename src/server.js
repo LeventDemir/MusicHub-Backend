@@ -17,7 +17,7 @@ mongoose.connection.on("error", err =>
   console.log(`Mongodb connection error: ${err}`)
 );
 
-app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.json({ limit: "200mb" }));
 app.use(cors());
 
 app.use("/user", require("./routes/user"));

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const playlist = new mongoose.Schema({
   uuid: {
     type: String,
@@ -26,5 +27,6 @@ const playlist = new mongoose.Schema({
     default: new Date()
   }
 });
+
 
 module.exports = mongoose.model("Playlist", playlist);

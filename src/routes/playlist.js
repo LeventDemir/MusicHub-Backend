@@ -6,6 +6,7 @@ const Music = require("../models/music");
 
 const router = express.Router();
 
+
 // Create Playlist
 
 router.post("/createPlaylist", (req, res) => {
@@ -18,6 +19,7 @@ router.post("/createPlaylist", (req, res) => {
     } else res.send({ el: false });
   });
 });
+
 
 // Add music to playlist
 
