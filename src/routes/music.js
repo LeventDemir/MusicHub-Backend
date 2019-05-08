@@ -22,6 +22,46 @@ router.post("/createMusic", (req, res) => {
 });
 
 
+// Update Music
+router.post("/updateMusic", (req, res) => {
+    const data = req.body.data
+
+    Music.findOne({ uuid: data.uuid }, (err, music) => {
+        if (music) {
+
+            music.photo = data.photo
+            music.name = data.name
+            music.description = data.description
+            music.lyrics = data.lyrics
+            music.artists = data.artists
+            music.playlists = data.playlists
+            music.categories = data.categories
+            music.tags = data.tags
+            music.audio = data.audio
+
+            music.save()
+
+            res.send({ msg: "updated" })
+        }
+        else res.send({ el: false })
+    })
+})
+
+// Delete Music
+router.delete("/deleteMusic", (req, res) => {
+
+    const music = req.query.music
+
+    Music.findOne({ uuid: music }, (err, music) => {
+        if (music) {
+            music.remove()
+            res.send({ msg: "deleted" })
+        } else res.send({ el: false })
+    })
+
+})
+
+
 // Get User Musics
 router.get('/getUserMusics', (req, res) => {
     const data = req.query.user
@@ -59,4 +99,44 @@ router.get('/getUserMusics', (req, res) => {
 })
 
 
+// Get User Music
+router.get("/getUserMusic", (req, res) => {
+    const data = req.query
+
+    Music.findOne({ uuid: data.music }, (err, music) => {
+
+        if (music) {
+            const data = {}
+
+            data.photo = music.photo
+            data.name = music.name
+            data.description = music.description
+            data.lyrics = music.lyrics
+            data.artists = music.artists
+            data.playlists = music.playlists
+            data.categories = music.categories
+            data.tags = music.tags
+            data.audio = music.audio
+
+            res.send(data)
+        }
+        else res.send({ el: false })
+    })
+})
+
+
 module.exports = router;
+
+
+
+// const imagePath = `/src/public/${data.owner_id}/musics`
+
+// if (!fs.exists(imagePath)) fs.mkdir(imagePath);
+
+// const imageData = data.photo.replace(/^data:image\/\w+;base64,/, "");
+
+// const buf = new Buffer(imageData, 'base64');
+
+// const imageName = `/${data.uuid}${new Date().getTime()}.${data.photo.split(";")[0].split("/")[1]}`
+
+// fs.writeFile(imagePath + imageName, buf);

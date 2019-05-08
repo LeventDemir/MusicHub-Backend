@@ -8,7 +8,6 @@ const router = express.Router();
 
 
 // Create Playlist
-
 router.post("/createPlaylist", (req, res) => {
   const data = req.body.data;
 
@@ -35,13 +34,43 @@ router.post("/addMusicToPlaylist", (req, res) => {
           if (music) {
             music.playlists.push(data.playlist);
             playlist.musics.push(data.music);
-            music.save(playlist.save(res.send({ mag: "updated" })));
+            music.save(playlist.save(res.send({ msg: "updated" })));
           } else res.send({ el: false });
         });
       }
     } else res.send({ el: false });
   });
 });
+
+
+router.get("/getUserPlaylists", (req, res) => {
+
+  const data = req.query.user
+
+  Playlist.find({ owner: data }, (err, playlists) => {
+    if (playlists) {
+
+      const data = []
+
+      playlists.forEach(playlist => {
+        let x = {}
+
+        x.uuid = playlist.uuid
+        x.owner = playlist.owner
+        x.photo = playlist.photo
+        x.name = playlist.name
+        x.musics = playlist.musics
+        x.createdDate = playlist.createdDate
+
+        data.push(x)
+      })
+
+      res.send(data)
+    }
+    else res.send({ el: false })
+  })
+
+})
 
 // Get Playlists
 // For development
