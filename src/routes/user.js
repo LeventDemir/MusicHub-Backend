@@ -1,8 +1,11 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const fs = require('fs')
+const http = require('http')
 const uuid = require("uuid/v1");
 const User = require("../models/user");
 const genToken = require("../utils/token");
+const setAvatar = require("../utils/avatar");
 const sendMail = require("../utils/mail");
 
 const router = express.Router();
@@ -15,30 +18,37 @@ router.post("/createUser", (req, res) => {
     User.findOne({ $or: [{ username: user.username }, { email: user.email }] },
         (err, result) => {
             if (result) {
-                if (result.username === user.username && result.email === user.email) {
-                    res.send({ el: "both" });
-                } else if (result.username === user.username) {
-                    res.send({ el: "username" });
-                } else if (result.email === user.email) {
-                    res.send({ el: "email" });
-                }
+                if (result.username === user.username && result.email === user.email) res.send({ el: "both" });
+                else if (result.username === user.username) res.send({ el: "username" });
+                else if (result.email === user.email) res.send({ el: "email" });
             } else {
-                if (user.username.includes("@") && !user.email.includes("@"))
-                    res.send({ el: "both" });
-                else if (user.username.includes("@")) res.send({ el: "username" });
-                else if (!user.email.includes("@")) res.send({ el: "email" });
+                if (user.username.includes("@") && !user.email.includes("@")) res.send({ error: "both" });
+                else if (user.username.includes("@")) res.send({ error: "username" });
+                else if (!user.email.includes("@")) res.send({ error: "email" });
                 else {
                     const token = genToken(100);
 
-                    user.token = token;
                     user.uuid = uuid();
+                    user.photo = `http://127.0.0.1:3000/public/avatar?user=${user.uuid}`
+                    user.token = token;
+
+                    fs.mkdir(`src/public/${user.uuid}`, () =>
+                        fs.mkdir(`src/public/${user.uuid}/avatar`, () => {
+                            const file = fs.createWriteStream(`src/public/${user.uuid}/avatar/avatar.png`);
+
+                            http.get("http://pngimages.net/sites/default/files/user-png-image-65995.png",
+                                response => response.pipe(file)
+                            );
+                        })
+                    )
 
                     const newUser = new User(user);
 
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(newUser.password, salt, (err, hash) => {
                             newUser.password = hash;
-                            newUser.save(res.send({ token }));
+
+                            newUser.save(() => res.send({ token }));
                         });
                     });
                 }
@@ -55,36 +65,17 @@ router.post("/login", (req, res) => {
     User.findOne({ $or: [{ username: user.uniqueData }, { email: user.uniqueData }] },
         (err, result) => {
             if (result) {
-                if (result.username === user.uniqueData) {
-                    bcrypt.compare(user.password, result.password, (err, status) => {
-                        if (status) {
-                            const token = genToken(100);
+                bcrypt.compare(user.password, result.password, (err, status) => {
+                    if (status) {
+                        const token = genToken(100);
 
-                            result.login = new Date().getTime();
-                            result.token = token;
+                        result.login = new Date().getTime();
+                        result.token = token;
 
-                            result.save(res.send({ token }));
-                        } else {
-                            res.send({ el: "password" });
-                        }
-                    });
-                } else {
-                    bcrypt.compare(user.password, result.password, (err, status) => {
-                        if (status) {
-                            const token = genToken(100);
-
-                            result.login = new Date().getTime();
-                            result.token = token;
-
-                            result.save(res.send({ token }));
-                        } else {
-                            res.send({ el: "password" });
-                        }
-                    });
-                }
-            } else {
-                res.send({ el: "uniqueData" });
-            }
+                        result.save(res.send({ token }));
+                    } else res.send({ el: "password" });
+                });
+            } else res.send({ el: "uniqueData" });
         }
     );
 });
@@ -112,64 +103,51 @@ router.post("/updateUserData", (req, res) => {
         if (user) {
             bcrypt.compare(userData.password, user.password, (err, status) => {
                 if (status) {
+
+                    setAvatar(userData.photo, user.uuid)
+                    user.fullName = userData.fullName;
+
                     if (
                         userData.username === user.username &&
                         userData.email === user.email
-                    ) {
-                        user.photo = userData.photo;
-                        user.fullName = userData.fullName;
-                        user.username = userData.username;
-                        user.email = userData.email;
+                    ) user.save(res.send({ msg: "updated" }));
 
-                        user.save(res.send({ msg: "updated" }));
-                    } else if (userData.username === user.username) {
+                    else if (userData.username === user.username)
                         User.findOne({ email: userData.email }, (err, result) => {
-                            if (result) {
-                                res.send({ el: "email" });
-                            } else {
-                                user.photo = userData.photo;
-                                user.fullName = userData.fullName;
-                                user.username = userData.username;
+                            if (result) res.send({ el: "email" });
+                            else {
                                 user.email = userData.email;
 
                                 user.save(res.send({ msg: "updated" }));
                             }
                         });
-                    } else if (userData.email === user.email) {
+
+                    else if (userData.email === user.email)
                         User.findOne({ username: userData.username }, (err, result) => {
-                            if (result) {
-                                res.send({ el: "username" });
-                            } else {
-                                user.photo = userData.photo;
-                                user.fullName = userData.fullName;
+                            if (result) res.send({ el: "username" });
+                            else {
                                 user.username = userData.username;
-                                user.email = userData.email;
 
                                 user.save(res.send({ msg: "updated" }));
                             }
                         });
-                    } else {
+
+                    else
                         User.findOne({
-                                $or: [
-                                    { username: userData.username },
-                                    { email: userData.email }
-                                ]
-                            },
+                            $or: [
+                                { username: userData.username },
+                                { email: userData.email }
+                            ]
+                        },
                             (err, result) => {
                                 if (result) {
                                     if (
                                         userData.username === result.username &&
                                         userData.email === result.email
-                                    ) {
-                                        res.send({ el: "both" });
-                                    } else if (userData.username === result.username) {
-                                        res.send({ el: "username" });
-                                    } else if (userData.email === result.email) {
-                                        res.send({ el: "email" });
-                                    }
+                                    ) res.send({ el: "both" });
+                                    else if (userData.username === result.username) res.send({ el: "username" });
+                                    else if (userData.email === result.email) res.send({ el: "email" });
                                 } else {
-                                    user.photo = userData.photo;
-                                    user.fullName = userData.fullName;
                                     user.username = userData.username;
                                     user.email = userData.email;
 
@@ -177,14 +155,10 @@ router.post("/updateUserData", (req, res) => {
                                 }
                             }
                         );
-                    }
-                } else {
-                    res.send({ el: "password" });
-                }
+
+                } else res.send({ el: "password" });
             });
-        } else {
-            res.send({ el: "token" });
-        }
+        } else res.send({ el: "token" });
     });
 });
 
@@ -207,18 +181,18 @@ router.post("/updatePassword", (req, res) => {
     const userData = req.body.user;
 
     User.findOne({ token: userData.token }, (err, user) => {
-        if (user) {
+        if (user)
             bcrypt.compare(userData.currentPassword, user.password, (err, result) => {
-                if (result) {
+                if (result)
                     bcrypt.genSalt(10, (err, salt) => {
                         bcrypt.hash(userData.newPassword, salt, (err, hash) => {
                             user.password = hash;
                             user.save(res.send({ msg: "updated" }));
                         });
                     });
-                } else res.send({ el: "currentPassword" });
+                else res.send({ el: "currentPassword" });
             });
-        } else res.send({ el: "token" });
+        else res.send({ el: "token" });
     });
 });
 
@@ -228,8 +202,8 @@ router.post("/forgotPassword", (req, res) => {
     const uniqueData = req.body.uniqueData;
 
     User.findOne({
-            $or: [{ username: uniqueData }, { email: uniqueData }]
-        },
+        $or: [{ username: uniqueData }, { email: uniqueData }]
+    },
         (err, user) => {
             if (user) {
                 const newPassword = (

@@ -17,12 +17,13 @@ mongoose.connection.on("error", err =>
   console.log(`Mongodb connection error: ${err}`)
 );
 
-app.use(bodyParser.json({ limit: "2000mb" }));
+app.use(bodyParser.json({ limit: "200mb" }));
 app.use(cors());
 
 app.use("/user", require("./routes/user"));
 app.use("/playlist", require("./routes/playlist"));
 app.use("/music", require("./routes/music"));
+app.use("/public", require("./routes/public"));
 
 
 app.get("*", (req, res) => res.send({ error_code: 404 }))

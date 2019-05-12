@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const user = new mongoose.Schema({
   uuid: {
     type: String,
@@ -31,7 +32,6 @@ const user = new mongoose.Schema({
   photo: {
     type: String,
     required: true,
-    default: "http://pngimages.net/sites/default/files/user-png-image-65995.png"
   },
   createdDate: {
     type: Date,
@@ -49,5 +49,6 @@ const user = new mongoose.Schema({
     unique: true
   }
 });
+
 
 module.exports = mongoose.model("User", user);
