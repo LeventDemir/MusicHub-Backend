@@ -100,65 +100,67 @@ router.post("/updateUserData", (req, res) => {
     const userData = req.body.userData;
 
     User.findOne({ token: userData.token }, (err, user) => {
-        if (user) {
-            bcrypt.compare(userData.password, user.password, (err, status) => {
-                if (status) {
+        if (user)
+            if (+user.login + 31536000000 > new Date().getTime())
+                bcrypt.compare(userData.password, user.password, (err, status) => {
+                    if (status) {
 
-                    setAvatar(userData.photo, user.uuid)
-                    user.fullName = userData.fullName;
+                        setAvatar(userData.photo, user.uuid)
+                        user.fullName = userData.fullName;
 
-                    if (
-                        userData.username === user.username &&
-                        userData.email === user.email
-                    ) user.save(res.send({ msg: "updated" }));
+                        if (
+                            userData.username === user.username &&
+                            userData.email === user.email
+                        ) user.save(res.send({ msg: "updated" }));
 
-                    else if (userData.username === user.username)
-                        User.findOne({ email: userData.email }, (err, result) => {
-                            if (result) res.send({ el: "email" });
-                            else {
-                                user.email = userData.email;
-
-                                user.save(res.send({ msg: "updated" }));
-                            }
-                        });
-
-                    else if (userData.email === user.email)
-                        User.findOne({ username: userData.username }, (err, result) => {
-                            if (result) res.send({ el: "username" });
-                            else {
-                                user.username = userData.username;
-
-                                user.save(res.send({ msg: "updated" }));
-                            }
-                        });
-
-                    else
-                        User.findOne({
-                            $or: [
-                                { username: userData.username },
-                                { email: userData.email }
-                            ]
-                        },
-                            (err, result) => {
-                                if (result) {
-                                    if (
-                                        userData.username === result.username &&
-                                        userData.email === result.email
-                                    ) res.send({ el: "both" });
-                                    else if (userData.username === result.username) res.send({ el: "username" });
-                                    else if (userData.email === result.email) res.send({ el: "email" });
-                                } else {
-                                    user.username = userData.username;
+                        else if (userData.username === user.username)
+                            User.findOne({ email: userData.email }, (err, result) => {
+                                if (result) res.send({ el: "email" });
+                                else {
                                     user.email = userData.email;
 
                                     user.save(res.send({ msg: "updated" }));
                                 }
-                            }
-                        );
+                            });
 
-                } else res.send({ el: "password" });
-            });
-        } else res.send({ el: "token" });
+                        else if (userData.email === user.email)
+                            User.findOne({ username: userData.username }, (err, result) => {
+                                if (result) res.send({ el: "username" });
+                                else {
+                                    user.username = userData.username;
+
+                                    user.save(res.send({ msg: "updated" }));
+                                }
+                            });
+
+                        else
+                            User.findOne({
+                                $or: [
+                                    { username: userData.username },
+                                    { email: userData.email }
+                                ]
+                            },
+                                (err, result) => {
+                                    if (result) {
+                                        if (
+                                            userData.username === result.username &&
+                                            userData.email === result.email
+                                        ) res.send({ el: "both" });
+                                        else if (userData.username === result.username) res.send({ el: "username" });
+                                        else if (userData.email === result.email) res.send({ el: "email" });
+                                    } else {
+                                        user.username = userData.username;
+                                        user.email = userData.email;
+
+                                        user.save(res.send({ msg: "updated" }));
+                                    }
+                                }
+                            );
+
+                    } else res.send({ el: "password" });
+                });
+            else res.send({ el: false })
+        else res.send({ el: "token" });
     });
 });
 
@@ -182,16 +184,18 @@ router.post("/updatePassword", (req, res) => {
 
     User.findOne({ token: userData.token }, (err, user) => {
         if (user)
-            bcrypt.compare(userData.currentPassword, user.password, (err, result) => {
-                if (result)
-                    bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(userData.newPassword, salt, (err, hash) => {
-                            user.password = hash;
-                            user.save(res.send({ msg: "updated" }));
+            if (+user.login + 31536000000 > new Date().getTime())
+                bcrypt.compare(userData.currentPassword, user.password, (err, result) => {
+                    if (result)
+                        bcrypt.genSalt(10, (err, salt) => {
+                            bcrypt.hash(userData.newPassword, salt, (err, hash) => {
+                                user.password = hash;
+                                user.save(res.send({ msg: "updated" }));
+                            });
                         });
-                    });
-                else res.send({ el: "currentPassword" });
-            });
+                    else res.send({ el: "currentPassword" });
+                });
+            else res.send({ el: false })
         else res.send({ el: "token" });
     });
 });
