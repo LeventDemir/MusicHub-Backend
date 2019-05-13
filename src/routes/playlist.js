@@ -58,25 +58,29 @@ router.post("/createPlaylist", (req, res) => {
 
 
 // Add music to playlist
-
 router.post("/addMusicToPlaylist", (req, res) => {
   const data = req.body.data;
 
-  Playlist.findOne({ uuid: data.playlist }, (err, playlist) => {
-    if (playlist) {
-      if (playlist.musics.includes(data.music)) {
-        res.send({ msg: "there is" });
-      } else {
-        Music.findOne({ uuid: data.music }, (err, music) => {
-          if (music) {
-            music.playlists.push(data.playlist);
-            playlist.musics.push(data.music);
-            music.save(playlist.save(res.send({ msg: "updated" })));
-          } else res.send({ el: false });
-        });
-      }
-    } else res.send({ el: false });
-  });
+  User.findOne({ token: data.token }, (err, user) => {
+    if (user)
+      if (+user.login + 31536000000 > new Date().getTime())
+        Playlist.findOne({ uuid: data.playlist, owner_id: user.uuid }, (err, playlist) => {
+          if (playlist)
+            if (!playlist.musics.includes(data.music))
+              Music.findOne({ uuid: data.music }, (err, music) => {
+                if (music) {
+                  playlist.musics.push(data.music);
+                  music.playlists.push(data.playlist);
+                  playlist.save(music.save(res.send({ msg: "updated" })));
+                }
+                else res.send({ el: false })
+              })
+            else res.send({ msg: "There is" })
+          else res.send({ el: false })
+        })
+      else res.send({ el: false })
+    else res.send({ el: false })
+  })
 });
 
 
@@ -84,7 +88,7 @@ router.get("/getUserPlaylists", (req, res) => {
 
   const data = req.query.user
 
-  Playlist.find({ owner: data }, (err, playlists) => {
+  Playlist.find({ owner_id: data }, (err, playlists) => {
     if (playlists) {
 
       const data = []
@@ -93,7 +97,8 @@ router.get("/getUserPlaylists", (req, res) => {
         let x = {}
 
         x.uuid = playlist.uuid
-        x.owner = playlist.owner
+        x.owner_id = playlist.owner_id
+        x.owner_username = playlist.owner_username
         x.photo = playlist.photo
         x.name = playlist.name
         x.musics = playlist.musics
@@ -108,6 +113,7 @@ router.get("/getUserPlaylists", (req, res) => {
   })
 
 })
+
 
 // Get Playlists
 // For development
