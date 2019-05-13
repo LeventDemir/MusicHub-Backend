@@ -16,7 +16,11 @@ const playlist = new mongoose.Schema({
     type: String,
     required: true
   },
-  owner: {
+  owner_id: {
+    type: String,
+    required: true
+  },
+  owner_username: {
     type: String,
     required: true
   },

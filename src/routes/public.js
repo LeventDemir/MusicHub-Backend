@@ -32,4 +32,19 @@ router.get("/avatar", (req, res) => {
 })
 
 
+router.get("/playlist", (req, res) => {
+
+    const data = req.query
+
+    const path = `${base_path}${data.user}/playlists/${data.playlist}/`
+
+
+    fs.readdir(path, (err, files) => {
+        if (files) res.sendFile(path + files[0])
+        else res.send({ error: 404 })
+    })
+
+})
+
+
 module.exports = router

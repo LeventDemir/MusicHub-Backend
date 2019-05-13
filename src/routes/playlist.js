@@ -1,4 +1,6 @@
 const express = require("express");
+const http = require('http')
+const fs = require('fs')
 const uuid = require("uuid/v1");
 const User = require("../models/user");
 const Playlist = require("../models/playlist");
@@ -11,12 +13,47 @@ const router = express.Router();
 router.post("/createPlaylist", (req, res) => {
   const data = req.body.data;
 
-  User.findOne({ uuid: data.owner }, (err, user) => {
-    if (user) {
-      data.uuid = uuid();
-      new Playlist(data).save(res.status(200).send());
-    } else res.send({ el: false });
-  });
+  User.findOne({ token: data.token }, (err, user) => {
+
+    if (user)
+      if (+user.login + 31536000000 > new Date().getTime()) {
+        data.uuid = uuid();
+        data.owner_id = user.uuid
+        data.owner_username = user.username
+
+        if (!fs.existsSync(`src/public/${data.owner_id}/playlists`))
+          fs.mkdirSync(`src/public/${data.owner_id}/playlists`)
+
+        fs.mkdirSync(`src/public/${data.owner_id}/playlists/${data.uuid}`)
+
+        if (data.photo.substr(0, 4) === "http") {
+
+          const file = fs.createWriteStream(`src/public/${data.owner_id}/playlists/${data.uuid}/${data.uuid}.jpg`);
+
+          http.get("http://fordhampoliticalreview.org/wp-content/uploads/2016/09/mic-headphones-silhouette-bw.jpg",
+            response => response.pipe(file)
+          );
+
+        } else {
+          const imageData = data.photo.replace(/^data:image\/\w+;base64,/, "");
+
+          const imagePath = `src/public/${data.owner_id}/playlists/${data.uuid}/`
+
+          const imageName = `${data.uuid}.${data.photo.split(";")[0].split("/")[1]}`
+
+          const buffer = new Buffer(imageData, 'base64');
+
+          fs.writeFile(imagePath + imageName, buffer, () => { });
+        }
+
+        data.photo = `http://127.0.0.1:3000/public/playlist?user=${data.owner_id}&playlist=${data.uuid}`
+
+        new Playlist(data).save(res.status(200).send());
+      }
+      else res.send({ el: false })
+    else res.send({ el: false })
+
+  })
 });
 
 
@@ -74,7 +111,6 @@ router.get("/getUserPlaylists", (req, res) => {
 
 // Get Playlists
 // For development
-
 router.get("/playlists", (req, res) => {
   Playlist.find({}, (err, users) => {
     res.send(users);
