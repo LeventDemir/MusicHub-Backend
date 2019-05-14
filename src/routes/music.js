@@ -15,8 +15,10 @@ router.post("/createMusic", (req, res) => {
 
     User.findOne({ token: data.token }, (err, user) => {
         if (user)
-            if (user.uuid === data.owner_id && +user.login + 31536000000 > new Date().getTime()) {
+            if (+user.login + 31536000000 > new Date().getTime()) {
                 data.uuid = uuid();
+                data.owner_id = user.uuid
+                data.owner_username = user.username
                 data.createdDate = new Date()
 
                 if (!fs.existsSync(`src/public/${data.owner_id}`))
