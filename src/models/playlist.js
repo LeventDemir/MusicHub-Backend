@@ -28,7 +28,6 @@ const playlist = new mongoose.Schema({
   createdDate: {
     type: Date,
     required: true,
-    default: new Date()
   }
 });
 

@@ -21,6 +21,15 @@ router.post("/createMusic", (req, res) => {
                 data.owner_username = user.username
                 data.createdDate = new Date()
 
+                for (let i in data.playlists) {
+                    Playlist.findOne({ uuid: data.playlists[i] }, (err, playlist) => {
+                        if (playlist) {
+                            playlist.musics.push(data.uuid)
+                            playlist.save()
+                        }
+                    })
+                }
+
                 if (!fs.existsSync(`src/public/${data.owner_id}`))
                     fs.mkdirSync(`src/public/${data.owner_id}`)
 
@@ -189,7 +198,7 @@ router.get('/getUserMusics', (req, res) => {
                 x.description = musics[i].description
                 x.lyrics = musics[i].lyrics
                 x.artists = musics[i].artists
-                x.Playlist = musics[i].Playlist
+                x.playlists = musics[i].playlists
                 x.categories = musics[i].categories
                 x.tags = musics[i].tags
 

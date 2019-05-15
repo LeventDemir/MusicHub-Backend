@@ -48,7 +48,10 @@ router.post("/createPlaylist", (req, res) => {
 
         data.photo = `http://127.0.0.1:3000/public/playlist?user=${data.owner_id}&playlist=${data.uuid}`
 
-        new Playlist(data).save(res.status(200).send());
+        data.createdDate = new Date()
+
+
+        new Playlist(data).save(res.send({ uuid: data.uuid, createdDate: data.createdDate }));
       }
       else res.send({ el: false })
     else res.send({ el: false })
