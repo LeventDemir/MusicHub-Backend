@@ -21,9 +21,6 @@ router.post("/createPlaylist", (req, res) => {
         data.owner_id = user.uuid
         data.owner_username = user.username
 
-        if (!fs.existsSync(`src/public/${data.owner_id}`))
-          fs.mkdirSync(`src/public/${data.owner_id}`)
-
         if (!fs.existsSync(`src/public/${data.owner_id}/playlists`))
           fs.mkdirSync(`src/public/${data.owner_id}/playlists`)
 
