@@ -20,6 +20,7 @@ router.post("/createMusic", (req, res) => {
                 data.owner_id = user.uuid
                 data.owner_username = user.username
                 data.createdDate = new Date()
+                data.playlists = []
 
                 if (!fs.existsSync(`src/public/${data.owner_id}`))
                     fs.mkdirSync(`src/public/${data.owner_id}`)
