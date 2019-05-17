@@ -21,15 +21,6 @@ router.post("/createMusic", (req, res) => {
                 data.owner_username = user.username
                 data.createdDate = new Date()
 
-                for (let i in data.playlists) {
-                    Playlist.findOne({ uuid: data.playlists[i] }, (err, playlist) => {
-                        if (playlist) {
-                            playlist.musics.push(data.uuid)
-                            playlist.save()
-                        }
-                    })
-                }
-
                 if (!fs.existsSync(`src/public/${data.owner_id}`))
                     fs.mkdirSync(`src/public/${data.owner_id}`)
 
@@ -130,7 +121,6 @@ router.post("/updateMusic", (req, res) => {
                         music.description = data.description
                         music.lyrics = data.lyrics
                         music.artists = data.artists
-                        music.playlists = data.playlists
                         music.categories = data.categories
                         music.tags = data.tags
 
@@ -165,6 +155,14 @@ router.delete("/deleteMusic", (req, res) => {
                                 })
                             ))
                         })
+
+                        for (let i in music.playlists)
+                            Playlist.findOne({ uuid: music.playlists[i] }, (err, playlist) => {
+                                if (playlist) {
+                                    playlist.musics.splice(playlist.musics.indexOf(music.uuid), 1)
+                                    playlist.save()
+                                }
+                            })
 
                         music.remove(res.send({ msg: "deleted" }))
                     }
