@@ -87,6 +87,44 @@ router.post("/addMusicToPlaylist", (req, res) => {
 });
 
 
+// Remove playlist
+router.delete('/removePlaylist', (req, res) => {
+  const data = req.body
+
+  User.findOne({ token: data.token }, (err, user) => {
+    if (user)
+      if (+user.login + 31536000000 > new Date().getTime())
+        Playlist.findOne({ uuid: data.playlist }, (err, playlist) => {
+          if (playlist)
+            if (playlist.owner_id === user.uuid) {
+              for (let i in playlist.musics) {
+                Music.findOne({ uuid: playlist.musics[i] }, (err, music) => {
+                  if (music) {
+                    music.playlists.splice(playlist.musics[i], 1)
+                    music.save()
+                  }
+                })
+              }
+
+              const path = `src/public/${playlist.owner_id}/playlists/${playlist.uuid}`
+
+              fs.readdir(path, (err, file) => {
+                if (file)
+                  fs.unlink(`${path}/${file[0]}`, () => fs.rmdir(path, () => { }))
+              })
+
+              playlist.remove(res.send({ msg: 'deleted' }))
+            }
+            else res.send({ el: false })
+          else res.send({ el: false })
+        })
+      else res.send({ el: false })
+    else res.send({ el: false })
+  })
+})
+
+
+// Get user playlists
 router.get("/getUserPlaylists", (req, res) => {
 
   const data = req.query.user
