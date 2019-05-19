@@ -60,6 +60,45 @@ router.post("/createPlaylist", (req, res) => {
 });
 
 
+// Update playlist
+router.post('/updatePlaylist', (req, res) => {
+  const data = req.body.data
+
+  User.findOne({ token: data.token }, (err, user) => {
+    if (user)
+      if (+user.login + 31536000000 > new Date().getTime())
+        Playlist.findOne({ uuid: data.playlist }, (err, playlist) => {
+          if (playlist)
+            if (playlist.owner_id === user.uuid) {
+              playlist.name = data.name
+
+              if (data.photo.substr(0, 4) !== "http") {
+                const imageData = data.photo.replace(/^data:image\/\w+;base64,/, "");
+
+                const imagePath = `src/public/${playlist.owner_id}/playlists/${playlist.uuid}/`
+
+                const imageName = `${playlist.uuid}.${data.photo.split(";")[0].split("/")[1]}`
+
+                const buffer = new Buffer(imageData, 'base64');
+
+                fs.readdir(imagePath, (err, image) => {
+                  fs.unlink(`${imagePath}${image[0]}`, () =>
+                    fs.writeFile(imagePath + imageName, buffer, () => { })
+                  )
+                })
+              }
+
+              playlist.save(res.send({ msg: 'updated' }))
+            }
+            else res.send({ el: false })
+          else res.send({ el: false })
+        })
+      else res.send({ el: false })
+    else res.send({ el: false })
+  })
+})
+
+
 // Add music to playlist
 router.post("/addMusicToPlaylist", (req, res) => {
   const data = req.body.data;
@@ -85,6 +124,36 @@ router.post("/addMusicToPlaylist", (req, res) => {
     else res.send({ el: false })
   })
 });
+
+
+// Remove music from playlist
+router.delete('/removeMusicFromPlaylist', (req, res) => {
+  const data = req.body.data
+
+  User.findOne({ token: data.token }, (err, user) => {
+    if (user)
+      if (+user.login + 31536000000 > new Date().getTime())
+        Playlist.findOne({ uuid: data.playlist }, (err, playlist) => {
+          if (playlist)
+            if (playlist.owner_id === user.uuid) {
+              playlist.musics.splice(playlist.musics.indexOf(data.music), 1)
+              playlist.save()
+
+              Music.findOne({ uuid: data.music }, (err, music) => {
+                if (music) {
+                  music.playlists.splice(music.playlists.indexOf(data.playlist), 1)
+                  music.save(res.send({ msg: 'removed' }))
+                }
+                else res.send({ el: false })
+              })
+            }
+            else res.send({ el: false })
+          else res.send({ el: false })
+        })
+      else res.send({ el: false })
+    else res.send({ el: false })
+  })
+})
 
 
 // Remove playlist

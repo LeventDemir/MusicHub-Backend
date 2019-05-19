@@ -200,6 +200,7 @@ router.get('/getUserMusics', (req, res) => {
                 x.playlists = musics[i].playlists
                 x.categories = musics[i].categories
                 x.tags = musics[i].tags
+                x.audio = musics[i].audio
 
                 data.push(x)
 
@@ -238,5 +239,35 @@ router.get("/getUserMusic", (req, res) => {
     })
 })
 
+
+// Get playlist musics
+router.get('/getPlaylistMusics', (req, res) => {
+    const playlist = req.query.playlist
+
+    Music.find({ playlists: playlist }, (err, musics) => {
+        if (musics) {
+            const data = []
+
+            for (let music in musics) {
+                let x = {}
+
+                x.uuid = musics[music].uuid
+                x.photo = musics[music].photo
+                x.name = musics[music].name
+                x.description = musics[music].description
+                x.lyrics = musics[music].lyrics
+                x.artists = musics[music].artists
+                x.playlists = musics[music].playlists
+                x.categories = musics[music].categories
+                x.tags = musics[music].tags
+                x.audio = musics[music].audio
+
+                data.push(x)
+            }
+
+            res.send(data)
+        }
+    })
+})
 
 module.exports = router;
