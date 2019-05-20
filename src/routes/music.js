@@ -270,4 +270,28 @@ router.get('/getPlaylistMusics', (req, res) => {
     })
 })
 
+
+// Get music
+router.get('/getMusic', (req, res) => {
+    const music = req.query.music
+
+    Music.findOne({ uuid: music }, (err, music) => {
+        if (music)
+            res.send({
+                uuid: music.uuid,
+                photo: music.photo,
+                name: music.name,
+                description: music.description,
+                lyrics: music.lyrics,
+                artists: music.artists,
+                playlists: music.playlists,
+                categories: music.categories,
+                tags: music.tags,
+                audio: music.audio
+            })
+        else res.send({ el: false })
+    })
+})
+
+
 module.exports = router;
