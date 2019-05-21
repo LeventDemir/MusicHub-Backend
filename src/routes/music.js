@@ -279,6 +279,8 @@ router.get('/getMusic', (req, res) => {
         if (music)
             res.send({
                 uuid: music.uuid,
+                owner_id: music.owner_id,
+                owner_username: music.owner_username,
                 photo: music.photo,
                 name: music.name,
                 description: music.description,
@@ -291,6 +293,39 @@ router.get('/getMusic', (req, res) => {
             })
         else res.send({ el: false })
     })
+})
+
+
+// Get musics
+router.get('/getMusics', (req, res) => {
+
+    Music.find({}, (err, musics) => {
+        if (musics) {
+            const data = []
+
+            for (let music in musics) {
+                let x = {}
+
+                x.uuid = musics[music].uuid
+                x.photo = musics[music].photo
+                x.name = musics[music].name
+                x.owner_id = musics[music].owner_id
+                x.owner_username = musics[music].owner_username
+                x.description = musics[music].description
+                x.lyrics = musics[music].lyrics
+                x.artists = musics[music].artists
+                x.playlists = musics[music].playlists
+                x.categories = musics[music].categories
+                x.tags = musics[music].tags
+                x.audio = musics[music].audio
+
+                data.push(x)
+            }
+
+            res.send(data)
+        }
+    })
+
 })
 
 
