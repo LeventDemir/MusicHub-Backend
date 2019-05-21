@@ -7,7 +7,7 @@ const app = express();
 
 const PORT = 3000 || process.env.PORT;
 
-mongoose.connect("mongodb://localhost/musichub", {
+mongoose.connect("mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub", {
   useNewUrlParser: true,
   useCreateIndex: true
 });
