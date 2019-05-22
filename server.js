@@ -1,6 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require("cors");
+// const cors = require("cors");
 const mongoose = require("mongoose");
 
 const app = express();
@@ -17,7 +17,7 @@ mongoose.connection.on("error", err => console.log(`Mongodb connection error: ${
 
 
 app.use(bodyParser.json({ limit: "200mb" }));
-app.use(cors());
+// app.use(cors());
 
 app.use("/user", require("./src/routes/user"));
 app.use("/playlist", require("./src/routes/playlist"));
