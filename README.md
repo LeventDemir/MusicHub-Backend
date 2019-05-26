@@ -8,7 +8,7 @@
 # install dependencies
 npm install
 
-# serve at localhost:8080
+# serve at localhost: 8080
 npm start
 
 # run for development with nodemon

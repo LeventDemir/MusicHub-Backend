@@ -48,7 +48,7 @@ router.post("/createUser", (req, res) => {
                         bcrypt.hash(newUser.password, salt, (err, hash) => {
                             newUser.password = hash;
 
-                            newUser.save(() => res.send({ token }));
+                            newUser.save(res.send({ token }));
                         });
                     });
                 }
@@ -166,8 +166,8 @@ router.post("/updateUserData", (req, res) => {
 
 
 // is Auth
-router.get("/isAuth", (req, res) => {
-    const token = req.query.token;
+router.post("/isAuth", (req, res) => {
+    const token = req.body.token;
 
     User.findOne({ token }, (err, user) => {
         if (user) {
@@ -251,14 +251,6 @@ router.get("/user", (req, res) => {
             else res.send({ el: "uniqueData" });
         }
     );
-});
-
-
-// Get Users for deveopment
-router.get("/users", (req, res) => {
-    const users = User.find({}, (err, users) => {
-        res.send(users);
-    });
 });
 
 

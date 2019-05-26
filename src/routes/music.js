@@ -28,13 +28,15 @@ router.post("/createMusic", (req, res) => {
                 if (!fs.existsSync(`src/public/${data.owner_id}/musics`))
                     fs.mkdirSync(`src/public/${data.owner_id}/musics`)
 
-                fs.mkdirSync(`src/public/${data.owner_id}/musics/${data.uuid}`)
-                fs.mkdirSync(`src/public/${data.owner_id}/musics/${data.uuid}/image`)
-                fs.mkdirSync(`src/public/${data.owner_id}/musics/${data.uuid}/audio`)
+                const path = `src/public/${data.owner_id}/musics/${data.uuid}`
+
+                fs.mkdirSync(path)
+                fs.mkdirSync(`${path}/image`)
+                fs.mkdirSync(`${path}/audio`)
 
                 if (data.photo.substr(0, 4) === "http") {
 
-                    const file = fs.createWriteStream(`src/public/${data.owner_id}/musics/${data.uuid}/image/${data.uuid}.jpg`);
+                    const file = fs.createWriteStream(`${path}/image/${data.uuid}.jpg`);
 
                     https.get("https://i.pinimg.com/originals/be/f1/a4/bef1a4dd9359b7ca253e5d01964ff761.jpg",
                         response => response.pipe(file)
@@ -44,14 +46,11 @@ router.post("/createMusic", (req, res) => {
                     // Save image
                     const imageData = data.photo.replace(/^data:image\/\w+;base64,/, "");
 
-                    const imagePath = `src/public/${data.owner_id}/musics/${data.uuid}/image/`
-
                     const imageName = `${data.uuid}.${data.photo.split(";")[0].split("/")[1]}`
 
                     const buffer = new Buffer(imageData, 'base64');
 
-                    fs.writeFile(imagePath + imageName, buffer, () => { });
-
+                    fs.writeFileSync(`${path}/image/${imageName}`, buffer);
                 }
 
                 data.photo = `http://127.0.0.1:3000/public/music?user=${data.owner_id}&music=${data.uuid}&file=image`
@@ -59,13 +58,11 @@ router.post("/createMusic", (req, res) => {
                 // Save audio
                 const audioData = data.audio.replace(/^data:audio\/\w+;base64,/, "");
 
-                const audioPath = `src/public/${data.owner_id}/musics/${data.uuid}/audio/`
-
                 const audioName = `${data.uuid}.${data.audio.split(";")[0].split("/")[1]}`
 
-                const audioBuffer = new Buffer(audioData, 'base64');
+                const buffer = new Buffer(audioData, 'base64');
 
-                fs.writeFile(audioPath + audioName, audioBuffer, () => { });
+                fs.writeFileSync(`${path}/audio/${audioName}`, buffer);
 
                 data.audio = `http://127.0.0.1:3000/public/music?user=${data.owner_id}&music=${data.uuid}&file=audio`
 
@@ -86,36 +83,33 @@ router.post("/updateMusic", (req, res) => {
             Music.findOne({ uuid: data.uuid }, (err, music) => {
                 if (music)
                     if (music.owner_id === user.uuid && +user.login + 31536000000 > new Date().getTime()) {
+
+                        const path = `src/public/${music.owner_id}/musics/${data.uuid}/`
+
                         if (data.photo.substr(0, 4) !== "http") {
                             const imageData = data.photo.replace(/^data:image\/\w+;base64,/, "");
-
-                            const imagePath = `src/public/${music.owner_id}/musics/${data.uuid}/image/`
 
                             const imageName = `${data.uuid}.${data.photo.split(";")[0].split("/")[1]}`
 
                             const buffer = new Buffer(imageData, 'base64');
 
-                            fs.readdir(imagePath, (err, image) => {
-                                fs.unlink(`${imagePath}${image[0]}`, () =>
-                                    fs.writeFile(imagePath + imageName, buffer, () => { })
-                                )
+                            fs.readdir(`${path}/image/`, (err, image) => {
+                                fs.unlinkSync(`${path}/image/${image[0]}`)
+                                fs.writeFileSync(`${path}/image/${imageName}`, buffer)
                             })
                         }
 
                         if (data.audio.substr(0, 4) !== "http") {
                             const audioData = data.audio.replace(/^data:audio\/\w+;base64,/, "");
 
-                            const audioPath = `src/public/${music.owner_id}/musics/${data.uuid}/audio/`
-
                             const audioName = `${data.uuid}.${data.audio.split(";")[0].split("/")[1]}`
 
                             const audioBuffer = new Buffer(audioData, 'base64');
 
-                            fs.readdir(audioPath, (err, audio) =>
-                                fs.unlink(`${audioPath}${audio[0]}`, () =>
-                                    fs.writeFile(audioPath + audioName, audioBuffer, () => { })
-                                )
-                            )
+                            fs.readdir(`${path}/audio/`, (err, audio) => {
+                                fs.unlinkSync(`${path}/audio/${audio[0]}`)
+                                fs.writeFileSync(`${path}/audio/${audioName}`, audioBuffer)
+                            })
                         }
 
                         music.name = data.name
@@ -181,9 +175,7 @@ router.get('/getUserMusics', (req, res) => {
     const owner_id = req.query.user
 
     Music.find({ owner_id }, (err, musics) => {
-
         if (musics) {
-
             const data = []
 
             for (let i in musics) {
@@ -203,13 +195,10 @@ router.get('/getUserMusics', (req, res) => {
                 x.audio = musics[i].audio
 
                 data.push(x)
-
-                x = {}
             }
 
             res.send(data)
-        }
-        else res.send({ el: false })
+        } else res.send({ el: false })
     })
 })
 
@@ -219,7 +208,6 @@ router.get("/getUserMusic", (req, res) => {
     const uuid = req.query.music
 
     Music.findOne({ uuid }, (err, music) => {
-
         if (music) {
             const data = {}
 
@@ -234,8 +222,7 @@ router.get("/getUserMusic", (req, res) => {
             data.audio = music.audio
 
             res.send(data)
-        }
-        else res.send({ el: false })
+        } else res.send({ el: false })
     })
 })
 
@@ -253,6 +240,8 @@ router.get('/getPlaylistMusics', (req, res) => {
 
                 x.uuid = musics[music].uuid
                 x.photo = musics[music].photo
+                x.owner_id = musics[music].owner_id
+                x.owner_username = musics[music].owner_username
                 x.name = musics[music].name
                 x.description = musics[music].description
                 x.lyrics = musics[music].lyrics
@@ -264,9 +253,8 @@ router.get('/getPlaylistMusics', (req, res) => {
 
                 data.push(x)
             }
-
             res.send(data)
-        }
+        } else res.send({ el: false })
     })
 })
 
@@ -323,7 +311,7 @@ router.get('/getMusics', (req, res) => {
             }
 
             res.send(data)
-        }
+        } else res.send({ el: false })
     })
 
 })

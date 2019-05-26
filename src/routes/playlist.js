@@ -24,11 +24,13 @@ router.post("/createPlaylist", (req, res) => {
         if (!fs.existsSync(`src/public/${data.owner_id}/playlists`))
           fs.mkdirSync(`src/public/${data.owner_id}/playlists`)
 
-        fs.mkdirSync(`src/public/${data.owner_id}/playlists/${data.uuid}`)
+        const path = `src/public/${data.owner_id}/playlists/${data.uuid}`
+
+        fs.mkdirSync(path)
 
         if (data.photo.substr(0, 4) === "http") {
 
-          const file = fs.createWriteStream(`src/public/${data.owner_id}/playlists/${data.uuid}/${data.uuid}.jpg`);
+          const file = fs.createWriteStream(`${path}/${data.uuid}.jpg`);
 
           http.get("http://fordhampoliticalreview.org/wp-content/uploads/2016/09/mic-headphones-silhouette-bw.jpg",
             response => response.pipe(file)
@@ -37,19 +39,15 @@ router.post("/createPlaylist", (req, res) => {
         } else {
           const imageData = data.photo.replace(/^data:image\/\w+;base64,/, "");
 
-          const imagePath = `src/public/${data.owner_id}/playlists/${data.uuid}/`
-
           const imageName = `${data.uuid}.${data.photo.split(";")[0].split("/")[1]}`
 
           const buffer = new Buffer(imageData, 'base64');
 
-          fs.writeFile(imagePath + imageName, buffer, () => { });
+          fs.writeFileSync(`${path}/${imageName}`, buffer);
         }
 
         data.photo = `http://127.0.0.1:3000/public/playlist?user=${data.owner_id}&playlist=${data.uuid}`
-
         data.createdDate = new Date()
-
 
         new Playlist(data).save(res.send({ uuid: data.uuid, createdDate: data.createdDate }));
       }
@@ -224,13 +222,5 @@ router.get("/getUserPlaylists", (req, res) => {
 
 })
 
-
-// Get Playlists
-// For development
-router.get("/playlists", (req, res) => {
-  Playlist.find({}, (err, users) => {
-    res.send(users);
-  });
-});
 
 module.exports = router;
