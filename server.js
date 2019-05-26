@@ -5,12 +5,11 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-mongoose.connect("mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub", {
-  useNewUrlParser: true,
-  useCreateIndex: true
-});
+// cloud db url: mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub
+
+mongoose.connect("mongodb://localhost/musichub", { useNewUrlParser: true, useCreateIndex: true });
 
 mongoose.connection.on("open", () => console.log("Connected to mongodb"));
 mongoose.connection.on("error", err => console.log(`Mongodb connection error: ${err}`));
@@ -18,7 +17,7 @@ mongoose.connection.on("error", err => console.log(`Mongodb connection error: ${
 
 app.use(bodyParser.json({ limit: "200mb" }));
 app.use(cors());
-app.options('*', cors());
+
 
 app.use("/user", require("./src/routes/user"));
 app.use("/playlist", require("./src/routes/playlist"));
@@ -31,4 +30,4 @@ app.post("*", (req, res) => res.send({ error_code: 404 }))
 app.delete("*", (req, res) => res.send({ error_code: 404 }))
 
 
-app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
+app.listen(port, () => console.log(`Server started on port: ${port}`));

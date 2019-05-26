@@ -32,15 +32,15 @@ router.post("/createUser", (req, res) => {
                     user.photo = `http://127.0.0.1:3000/public/avatar?user=${user.uuid}`
                     user.token = token;
 
-                    // fs.mkdir(`src/public/${user.uuid}`, () =>
-                    //     fs.mkdir(`src/public/${user.uuid}/avatar`, () => {
-                    //         const file = fs.createWriteStream(`src/public/${user.uuid}/avatar/avatar.png`);
+                    fs.mkdir(`src/public/${user.uuid}`, () =>
+                        fs.mkdir(`src/public/${user.uuid}/avatar`, () => {
+                            const file = fs.createWriteStream(`src/public/${user.uuid}/avatar/avatar.png`);
 
-                    //         http.get("http://pngimages.net/sites/default/files/user-png-image-65995.png",
-                    //             response => response.pipe(file)
-                    //         );
-                    //     })
-                    // )
+                            http.get("http://pngimages.net/sites/default/files/user-png-image-65995.png",
+                                response => response.pipe(file)
+                            );
+                        })
+                    )
 
                     const newUser = new User(user);
 
