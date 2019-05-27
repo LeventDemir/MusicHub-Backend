@@ -47,7 +47,10 @@ router.get("/playlist", (req, res) => {
 })
 
 
-router.get('/base/avatar', (req, res) => res.sendFile(`${base_path}base/avatar.png`))
+router.get('/base', (req, res) => {
+    if (req.query.image === 'avatar') res.sendFile(`${base_path}base/avatar.png`)
+    else res.sendFile(`${base_path}base/playlist.jpg`)
+})
 
 
 module.exports = router

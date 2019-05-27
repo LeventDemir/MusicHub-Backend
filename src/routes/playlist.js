@@ -32,7 +32,7 @@ router.post("/createPlaylist", (req, res) => {
 
           const file = fs.createWriteStream(`${path}/${data.uuid}.jpg`);
 
-          http.get("https://musichubs.herokuapp.com//public/base/avatar",
+          http.get("https://musichubs.herokuapp.com/public/base?image=playlist",
             response => response.pipe(file)
           );
 
