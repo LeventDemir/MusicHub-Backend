@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const fs = require('fs')
-const http = require('http')
+const https = require('https')
 const uuid = require("uuid/v1");
 const User = require("../models/user");
 const genToken = require("../utils/token");
@@ -36,7 +36,7 @@ router.post("/createUser", (req, res) => {
                         fs.mkdir(`src/public/${user.uuid}/avatar`, () => {
                             const file = fs.createWriteStream(`src/public/${user.uuid}/avatar/avatar.png`);
 
-                            http.get("https://musichubs.herokuapp.com/public/base?image=avatar",
+                            https.get("https://musichubs.herokuapp.com/public/base?image=avatar",
                                 response => response.pipe(file)
                             );
                         })

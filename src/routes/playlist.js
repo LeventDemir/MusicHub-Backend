@@ -1,5 +1,5 @@
 const express = require("express");
-const http = require('http')
+const https = require('https')
 const fs = require('fs')
 const uuid = require("uuid/v1");
 const User = require("../models/user");
@@ -32,7 +32,7 @@ router.post("/createPlaylist", (req, res) => {
 
           const file = fs.createWriteStream(`${path}/${data.uuid}.jpg`);
 
-          http.get("https://musichubs.herokuapp.com/public/base?image=playlist",
+          https.get("https://musichubs.herokuapp.com/public/base?image=playlist",
             response => response.pipe(file)
           );
 
