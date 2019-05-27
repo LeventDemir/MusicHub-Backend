@@ -47,4 +47,7 @@ router.get("/playlist", (req, res) => {
 })
 
 
+router.get('/base/avatar', (req, res) => res.sendFile(`${base_path}base/avatar.png`))
+
+
 module.exports = router

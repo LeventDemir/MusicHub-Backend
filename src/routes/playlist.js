@@ -32,7 +32,7 @@ router.post("/createPlaylist", (req, res) => {
 
           const file = fs.createWriteStream(`${path}/${data.uuid}.jpg`);
 
-          http.get("http://fordhampoliticalreview.org/wp-content/uploads/2016/09/mic-headphones-silhouette-bw.jpg",
+          http.get("https://musichubs.herokuapp.com//public/base/avatar",
             response => response.pipe(file)
           );
 
@@ -46,7 +46,7 @@ router.post("/createPlaylist", (req, res) => {
           fs.writeFileSync(`${path}/${imageName}`, buffer);
         }
 
-        data.photo = `http://127.0.0.1:3000/public/playlist?user=${data.owner_id}&playlist=${data.uuid}`
+        data.photo = `https://musichubs.herokuapp.com/public/playlist?user=${data.owner_id}&playlist=${data.uuid}`
         data.createdDate = new Date()
 
         new Playlist(data).save(res.send({ uuid: data.uuid, createdDate: data.createdDate }));

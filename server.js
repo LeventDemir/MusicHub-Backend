@@ -7,9 +7,15 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 
-// cloud db url: mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub
+// cloud db: mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub
+// local db: mongodb://localhost/musichub
 
-mongoose.connect("mongodb://localhost/musichub", { useNewUrlParser: true, useCreateIndex: true });
+mongoose.connect("mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub",
+    {
+        useNewUrlParser: true,
+        useCreateIndex: true
+    }
+);
 
 mongoose.connection.on("open", () => console.log("Connected to mongodb"));
 mongoose.connection.on("error", err => console.log(`Mongodb connection error: ${err}`));

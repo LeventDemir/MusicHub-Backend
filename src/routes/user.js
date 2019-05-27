@@ -29,14 +29,14 @@ router.post("/createUser", (req, res) => {
                     const token = genToken(100);
 
                     user.uuid = uuid();
-                    user.photo = `http://127.0.0.1:3000/public/avatar?user=${user.uuid}`
+                    user.photo = `https://musichubs.herokuapp.com/public/avatar?user=${user.uuid}`
                     user.token = token;
 
                     fs.mkdir(`src/public/${user.uuid}`, () =>
                         fs.mkdir(`src/public/${user.uuid}/avatar`, () => {
                             const file = fs.createWriteStream(`src/public/${user.uuid}/avatar/avatar.png`);
 
-                            http.get("http://pngimages.net/sites/default/files/user-png-image-65995.png",
+                            http.get("https://musichubs.herokuapp.com/public/base/avatar",
                                 response => response.pipe(file)
                             );
                         })
