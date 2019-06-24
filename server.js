@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 // cloud db: mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub
 // local db: mongodb://localhost/musichub
 
-mongoose.connect("mongodb://levent:Levent.1234@ds159546.mlab.com:59546/musichub",
+mongoose.connect("mongodb://localhost/musichub",
     {
         useNewUrlParser: true,
         useCreateIndex: true
