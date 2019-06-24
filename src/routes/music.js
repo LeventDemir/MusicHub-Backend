@@ -53,7 +53,9 @@ router.post("/createMusic", (req, res) => {
                     fs.writeFileSync(`${path}/image/${imageName}`, buffer);
                 }
 
-                data.photo = `https://musichubs.herokuapp.com/public/music?user=${data.owner_id}&music=${data.uuid}&file=image`
+                const base_url = "http://127.0.0.1:3000/"
+
+                data.photo = `${base_url}public/music?user=${data.owner_id}&music=${data.uuid}&file=image`
 
                 // Save audio
                 const audioData = data.audio.replace(/^data:audio\/\w+;base64,/, "");
@@ -64,7 +66,7 @@ router.post("/createMusic", (req, res) => {
 
                 fs.writeFileSync(`${path}/audio/${audioName}`, buffer);
 
-                data.audio = `https://musichubs.herokuapp.com/public/music?user=${data.owner_id}&music=${data.uuid}&file=audio`
+                data.audio = `${base_url}public/music?user=${data.owner_id}&music=${data.uuid}&file=audio`
 
                 new Music(data).save(res.send({ uuid: data.uuid, createdDate: data.createdDate }))
             }
