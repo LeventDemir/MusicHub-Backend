@@ -38,7 +38,7 @@ router.post("/createMusic", (req, res) => {
 
                     const file = fs.createWriteStream(`${path}/image/${data.uuid}.jpg`);
 
-                    https.get("https://i.pinimg.com/originals/be/f1/a4/bef1a4dd9359b7ca253e5d01964ff761.jpg",
+                    https.get("https://musichubs.herokuapp.com/public/base?image=music",
                         response => response.pipe(file)
                     );
 
@@ -53,7 +53,7 @@ router.post("/createMusic", (req, res) => {
                     fs.writeFileSync(`${path}/image/${imageName}`, buffer);
                 }
 
-                const base_url = "http://127.0.0.1:3000/"
+                const base_url = "https://musichubs.herokuapp.com/"
 
                 data.photo = `${base_url}public/music?user=${data.owner_id}&music=${data.uuid}&file=image`
 

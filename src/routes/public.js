@@ -49,6 +49,7 @@ router.get("/playlist", (req, res) => {
 
 router.get('/base', (req, res) => {
     if (req.query.image === 'avatar') res.sendFile(`${base_path}base/avatar.png`)
+    else if (req.query.image === 'music') res.sendFile(`${base_path}base/music.jpg`)
     else res.sendFile(`${base_path}base/playlist.jpg`)
 })
 

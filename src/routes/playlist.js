@@ -46,7 +46,7 @@ router.post("/createPlaylist", (req, res) => {
           fs.writeFileSync(`${path}/${imageName}`, buffer);
         }
 
-        data.photo = `http://127.0.0.1:3000/public/playlist?user=${data.owner_id}&playlist=${data.uuid}`
+        data.photo = `https://musichubs.herokuapp.com/public/playlist?user=${data.owner_id}&playlist=${data.uuid}`
         data.createdDate = new Date()
 
         new Playlist(data).save(res.send({ uuid: data.uuid, createdDate: data.createdDate }));
