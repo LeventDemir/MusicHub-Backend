@@ -53,7 +53,7 @@ router.post("/createMusic", (req, res) => {
                     fs.writeFileSync(`${path}/image/${imageName}`, buffer);
                 }
 
-                const base_url = "https://musichubs.herokuapp.com/"
+                const base_url = "http://127.0.0.1:3000/"
 
                 data.photo = `${base_url}public/music?user=${data.owner_id}&music=${data.uuid}&file=image`
 
@@ -293,24 +293,30 @@ router.get('/getMusics', (req, res) => {
         if (musics) {
             const data = []
 
-            for (let music in musics) {
+            const page = +req.query.page === 1 ? [0, 2] : [(+req.query.page * 2) - 2, 2 * +req.query.page]
+
+            content = musics.slice(page[0], page[1])
+
+            for (let music in content) {
                 let x = {}
 
-                x.uuid = musics[music].uuid
-                x.photo = musics[music].photo
-                x.name = musics[music].name
-                x.owner_id = musics[music].owner_id
-                x.owner_username = musics[music].owner_username
-                x.description = musics[music].description
-                x.lyrics = musics[music].lyrics
-                x.artists = musics[music].artists
-                x.playlists = musics[music].playlists
-                x.categories = musics[music].categories
-                x.tags = musics[music].tags
-                x.audio = musics[music].audio
+                x.uuid = content[music].uuid
+                x.photo = content[music].photo
+                x.name = content[music].name
+                x.owner_id = content[music].owner_id
+                x.owner_username = content[music].owner_username
+                x.description = content[music].description
+                x.lyrics = content[music].lyrics
+                x.artists = content[music].artists
+                x.playlists = content[music].playlists
+                x.categories = content[music].categories
+                x.tags = content[music].tags
+                x.audio = content[music].audio
 
                 data.push(x)
             }
+
+            data.push({ pages: Math.ceil(musics.length / 2), currentPage: +req.query.page })
 
             res.send(data)
         } else res.send({ el: false })

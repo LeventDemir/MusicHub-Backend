@@ -29,7 +29,7 @@ router.post("/createUser", (req, res) => {
                     const token = genToken(100);
 
                     user.uuid = uuid();
-                    user.photo = `127.0.0.1:3000/public/avatar?user=${user.uuid}`
+                    user.photo = `http://127.0.0.1:3000/public/avatar?user=${user.uuid}`
                     user.token = token;
 
                     fs.mkdir(`src/public/${user.uuid}`, () =>
