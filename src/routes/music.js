@@ -293,7 +293,7 @@ router.get('/getMusics', (req, res) => {
         if (musics) {
             const data = []
 
-            const page = +req.query.page === 1 ? [0, 2] : [(+req.query.page * 2) - 2, 2 * +req.query.page]
+            const page = +req.query.page === 1 ? [0, 8] : [(+req.query.page * 8) - 8, 8 * +req.query.page]
 
             content = musics.slice(page[0], page[1])
 
@@ -316,7 +316,7 @@ router.get('/getMusics', (req, res) => {
                 data.push(x)
             }
 
-            data.push({ pages: Math.ceil(musics.length / 2), currentPage: +req.query.page })
+            data.push({ pages: Math.ceil(musics.length / 8), currentPage: +req.query.page })
 
             res.send(data)
         } else res.send({ el: false })
