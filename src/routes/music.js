@@ -325,4 +325,76 @@ router.get('/getMusics', (req, res) => {
 })
 
 
+router.get('/search', (req, res) => {
+
+    const query = req.query.query
+
+    Music.find({
+        $or: [
+            { name: { $regex: query } },
+            { owner_username: { $regex: query } },
+            { description: { $regex: query } },
+            { lyrics: { $regex: query } },
+            { artists: { $regex: query } },
+            { categories: { $regex: query } },
+            { tags: { $regex: query } },
+        ]
+    }, (err, musics) => {
+        if (musics) {
+
+            const data = []
+
+            for (music in musics) {
+                let x = {}
+
+                x.uuid = musics[music].uuid
+                x.photo = musics[music].photo
+                x.title = musics[music].name
+                x.owner_id = musics[music].owner_id
+                x.owner_username = musics[music].owner_username
+                x.description = musics[music].description
+                x.lyrics = musics[music].lyrics
+                x.artists = musics[music].artists
+                x.playlists = musics[music].playlists
+                x.categories = musics[music].categories
+                x.tags = musics[music].tags
+                x.audio = musics[music].audio
+
+                data.push(x)
+            }
+
+            Playlist.find({
+                $or: [
+                    { name: { $regex: query } },
+                    { owner_username: { $regex: query } },
+                ]
+            }, (err, playlists) => {
+                if (playlists) {
+
+                    for (playlist in playlists) {
+                        let x = {}
+
+                        x.uuid = playlists[playlist].uuid
+                        x.photo = playlists[playlist].photo
+                        x.title = playlists[playlist].name
+                        x.owner_id = playlists[playlist].owner_id
+                        x.owner_username = playlists[playlist].owner_username
+                        x.musics = playlists[playlist].musics
+                        x.createdDate = playlists[playlist].createdDate
+
+                        data.push(x)
+                    }
+
+                    res.send(data)
+
+                } else res.send({ el: false })
+            })
+
+        } else res.send({ el: false })
+    })
+
+
+})
+
+
 module.exports = router;
